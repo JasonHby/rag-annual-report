@@ -4,3 +4,4 @@ chroma_db/
 *.pyc
 .env
 .vscode/
+martinrea_report.pdf
