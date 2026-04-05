@@ -34,3 +34,29 @@ Create and activate a virtual environment, then install dependencies.
 pip install langchain-community langchain-text-splitters pypdf
 pip install langchain-huggingface langchain-chroma chromadb sentence-transformers
 pip install fastapi uvicorn langchain-openai
+
+Environment Variable
+Set your Groq API key before running the API:
+
+export GROQ_API_KEY="your_api_key"
+On PowerShell:
+
+$env:GROQ_API_KEY="your_api_key"
+Run
+1. Chunk the document
+python day1_chunking.py
+2. Build and test retrieval
+python day2_retrieval.py
+3. Start the API server
+uvicorn day3_api:app --reload
+Then open:
+
+http://127.0.0.1:8000/docs
+Example Query
+{
+  "question": "What were the company's total sales in 2025?"
+}
+Notes
+The PDF file is not included in this repository.
+Place the annual report PDF in the project root as martinrea_report.pdf.
+Retrieval quality depends on PDF text quality and query phrasing.
