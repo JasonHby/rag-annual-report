@@ -4,12 +4,7 @@ A simple end-to-end RAG system for question answering over corporate annual repo
 
 ## Overview
 
-This project demonstrates a basic retrieval-augmented generation pipeline over a PDF annual report:
-
-1. Load and chunk the report into searchable text segments
-2. Generate embeddings and store them in a local Chroma vector database
-3. Retrieve the most relevant chunks for a user query
-4. Send grounded context to an LLM and return both the answer and cited sources
+This project demonstrates a basic retrieval-augmented generation pipeline over a PDF annual report. It loads report content, splits it into searchable chunks, stores embeddings in a local vector database, retrieves relevant evidence for a user query, and sends grounded context to an LLM to generate an answer with cited sources.
 
 ## Tech Stack
 
@@ -22,41 +17,75 @@ This project demonstrates a basic retrieval-augmented generation pipeline over a
 
 ## Project Structure
 
-- `day1_chunking.py`: PDF ingestion and text chunking
-- `day2_retrieval.py`: local embeddings, Chroma storage, and retrieval
-- `day3_api.py`: FastAPI endpoint and LLM-based answer generation
+```text
+.
+├── day1_chunking.py
+├── day2_retrieval.py
+├── day3_api.py
+├── README.md
+└── .gitignore
 
-## Setup
+Core Functions
+PDF Ingestion and Chunking
+The report is loaded with PyPDFLoader and split into smaller overlapping chunks using RecursiveCharacterTextSplitter. This makes the document easier to index and retrieve from later.
 
-Create and activate a virtual environment, then install dependencies.
+Embeddings and Retrieval
+Each chunk is converted into a vector using HuggingFaceEmbeddings and stored locally in Chroma. When a user asks a question, the query is embedded and matched against stored chunk vectors to retrieve the most relevant content.
 
-```bash
+API and Answer Generation
+A FastAPI endpoint accepts a question, retrieves the top relevant chunks, formats them into prompt context, and sends that context to a Groq-hosted LLM. The API returns both the generated answer and the supporting source chunks with page references.
+
+Setup
+Create and activate a virtual environment, then install the dependencies.
+
 pip install langchain-community langchain-text-splitters pypdf
 pip install langchain-huggingface langchain-chroma chromadb sentence-transformers
 pip install fastapi uvicorn langchain-openai
-
 Environment Variable
-Set your Groq API key before running the API:
+Set your Groq API key before running the API.
 
-export GROQ_API_KEY="your_api_key"
-On PowerShell:
-
+PowerShell
 $env:GROQ_API_KEY="your_api_key"
-Run
-1. Chunk the document
+Bash
+export GROQ_API_KEY="your_api_key"
+Usage
+Run PDF chunking
 python day1_chunking.py
-2. Build and test retrieval
+Build the vector database and test retrieval
 python day2_retrieval.py
-3. Start the API server
+Start the API server
 uvicorn day3_api:app --reload
 Then open:
 
 http://127.0.0.1:8000/docs
 Example Query
+Example request body in /docs:
+
 {
   "question": "What were the company's total sales in 2025?"
 }
+Example response:
+
+{
+  "answer": "Total sales revenue for 2025: $4,821,851 (in thousands).",
+  "sources": [
+    {
+      "source": "annual_report.pdf",
+      "page": 55,
+      "page_label": "56",
+      "score": 0.40,
+      "content": "Selected Annual Information ..."
+    }
+  ]
+}
 Notes
 The PDF file is not included in this repository.
-Place the annual report PDF in the project root as martinrea_report.pdf.
+Place the annual report PDF in the project root before running the scripts.
 Retrieval quality depends on PDF text quality and query phrasing.
+This is a lightweight demo project intended for learning and interview preparation.
+Possible Improvements
+Improve PDF text cleaning for tables, headers, and repeated formatting noise
+Add hybrid retrieval or reranking for better precision on financial questions
+Introduce query rewriting to improve retrieval quality
+Add a lightweight frontend on top of the FastAPI backend
+Generalize the pipeline to support multiple reports instead of a single PDF
